@@ -1,0 +1,4 @@
+PyQuery
+flask
+jinja2
+requests

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Watch a Project</h2>
+    <form action="" class="c" method="post">
+        <div class="form-groups">
+            <div class="form-group bz-product">
+                <div class="form-label">
+                    <label for="bz_product">Bugzilla Product</label>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="bz_product" id="bz_product" maxlength="50" required>
+                </div>
+            </div>
+            <div class="form-group bz-milestone">
+                <div class="form-label">
+                    <label for="bz_milestone">Bugzilla Milestone</label>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="bz_milestone" id="bz_milestone" required>
+                </div>
+            </div>
+            <div class="form-group gh-user c">
+                <div class="form-label">
+                    <label for="bz_milestone">GitHub User</label>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="gh_user" id="gh_user" required>
+                </div>
+            </div>
+            <div class="form-group gh-repo c">
+                <div class="form-label">
+                    <label for="bz_milestone">GitHub Repo</label>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="gh_repo" id="gh_repo" required>
+                </div>
+            </div>
+            <div class="form-group users">
+                <div class="form-label">
+                    <label for="id_style">Users</label>
+                </div>
+                <div class="form-field">
+                    <p class="mapping"><span>GitHub</span> &rarr; <span>Bugzilla</span></p>
+                    {% for x in range(5) %}
+                    <p>
+                        <span><input type="text" name="gh_users" id="gh_users"></span>
+                        &rarr;
+                        <span><input type="text" name="bz_users" id="bz_users"></span>
+                    </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <footer>
+            <button class="button" type="submit">Watch Them</button>
+        </footer>
+    </form>
+{% endblock %}
