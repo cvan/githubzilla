@@ -30,7 +30,7 @@
             <ul class="bugs">
             {% for user, value in value.iteritems() %}
                 <li>
-                    <div class="user">{{ user }}{% if value %} ({{ value[0].assigned_to.real_name }}){% endif %}</div>
+                    <div class="user"><div class="avatar" style="background-image:url({{ user|gravatar_url }})"></div> {{ value[0].assigned_to.real_name if value else user }}</div>
                     {% if not value %}
                         <span class="none">None</span>
                     {% else %}
@@ -55,7 +55,7 @@
     {% endfor %}
 
     <h2>Watch a Project</h2>
-    <form action="" class="c" method="post">
+    <form class="c" method="post">
         <div class="form-groups">
             <div class="form-group bz-product">
                 <div class="form-label">
@@ -73,28 +73,12 @@
                     <input type="text" name="bz_milestone" id="bz_milestone" required>
                 </div>
             </div>
-            <div class="form-group gh-user c">
-                <div class="form-label">
-                    <label for="bz_milestone">GitHub User</label>
-                </div>
-                <div class="form-field">
-                    <input type="text" name="gh_user" id="gh_user" required>
-                </div>
-            </div>
-            <div class="form-group gh-repo c">
-                <div class="form-label">
-                    <label for="bz_milestone">GitHub Repo</label>
-                </div>
-                <div class="form-field">
-                    <input type="text" name="gh_repo" id="gh_repo" required>
-                </div>
-            </div>
             <div class="form-group users">
                 <div class="form-label">
                     <label for="id_style">Users</label>
                 </div>
                 <div class="form-field">
-                    <p class="mapping"><span>GitHub</span> &rarr; <span>Bugzilla</span></p>
+                    <p class="mapping"><span>GitHub username</span> &rarr; <span>Bugzilla email</span></p>
                     {% for x in range(15) %}
                     <p>
                         <span><input type="text" name="gh_users" id="gh_users"></span>
