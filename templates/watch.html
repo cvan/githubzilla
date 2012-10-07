@@ -3,26 +3,51 @@
 {% block content %}
     <h2>Dashboard</h2>
     <h3>Bugs</h3>
+    <form>
+        <fieldset>
+            <legend>Filter by Status:</legend>
+            <label>
+                <input type="checkbox" name="visible_bugs" value="1"> NEW, REOPENED
+            </label>
+            <label>
+                <input type="checkbox" name="visible_bugs" value="2"> RESOLVED DUPLICATE/INVALID/WONTFIX/WORKSFORME
+            </label>
+            <label>
+                <input type="checkbox" name="visible_bugs" value="3"> RESOLVED/VERIFIED FIXED
+            </label>
+            <label>
+                <input type="checkbox" name="visible_bugs" value="4"> RESOLVED FIXED
+            </label>
+            <label>
+                <input type="checkbox" name="visible_bugs" value="5"> VERIFIED
+            </label>
+        </fieldset>
+    </form>
     {% for product, value in bugs.iteritems() %}
         <h4>{{ product }}</h4>
         {% for milestone, value in value.iteritems() %}
             <h5>{{ milestone }}</h5>
-            <ul>
+            <ul class="bugs">
             {% for user, value in value.iteritems() %}
                 <li>
-                    {{ user }}
-                    <ul>
-                        {% for bug in value %}
-                            <li>
-                                <dl>
-                                    {% for column, value in bug.iteritems() %}
-                                        <dt>{{ column }}</dt>
-                                        <dd>{{ value }}</dd>
-                                    {% endfor %}
-                                </dl>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    <div class="user">{{ user }}{% if value %} ({{ value[0].assigned_to.real_name }}){% endif %}</div>
+                    {% if not value %}
+                        <span class="none">None</span>
+                    {% else %}
+                        <ol>
+                            {% for bug in value %}
+                                <li class="bug" data-id="{{ bug.id }}" data-status="{{ bug.status }}" data-resolution="{{ bug.resolution }}"
+                                    data-priority="{{ bug.priority }}" data-modified="{{ bug.last_change_time }}">
+                                    <a href="http://bugzil.la/{{ bug.id }}" target="_blank">
+                                        <b class="status">{{ bug.status }} {{ bug.resolution }}</b>
+                                        <b class="priority">{{ bug.priority }}</b>
+                                        <b class="id">Bug {{ bug.id }}</b>
+                                        <span class="summary">{{ bug.summary }}</span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    {% endif %}
                 </li>
             {% endfor %}
             </ul>
@@ -70,7 +95,7 @@
                 </div>
                 <div class="form-field">
                     <p class="mapping"><span>GitHub</span> &rarr; <span>Bugzilla</span></p>
-                    {% for x in range(5) %}
+                    {% for x in range(15) %}
                     <p>
                         <span><input type="text" name="gh_users" id="gh_users"></span>
                         &rarr;
