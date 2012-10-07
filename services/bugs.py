@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import sys
 sys.path.append('..')
 
@@ -8,50 +9,77 @@ import requests
 from services import *
 
 
-# Set milestones.
-#print redis.delete('milestones')
-#print redis.sadd('milestones', '2012-10-04')
-#print redis.sadd('milestones', '2012-10-11')
-milestones = list(redis.smembers('milestones'))
+# Set products.
+#print redis.delete('products')
 
-for milestone in milestones:
-    print milestone
-
-
-'''
-# DESC -> ASC.
-print redis.lrange('milestones', '0', '-1')
+# print redis.sadd('products', 'marketplace')
+# print redis.sadd('products', 'addons')
+products = list(redis.smembers('products'))
+# print products
 
 
-bz_product = settings.BZ_DEFAULT_PRODUCT
-bz_milestone = settings.BZ_DEFAULT_MILESTONE
+# # Set milestones.
+# print redis.delete('products:marketplace')
+# print redis.delete('products:addons')
+# for product in products:
+#     print redis.delete('products:%s:milestones' % product)
+#     print redis.sadd('products:%s:milestones' % product, '2012-10-04')
+#     print redis.sadd('products:%s:milestones' % product, '2012-10-11')
 
-gh_user = settings.GH_DEFAULT_USER
-gh_repo = settings.GH_DEFAULT_REPO
+#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'cvan@mozilla.com')
+#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'amckay@mozilla.com')
+#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'kumar.mcmillan@gmail.com')
+#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'mattbasta@gmail.com')
 
-#gh_users
-#bz_users
-
-bz_assignees = '|'.join(map(lambda x: 'assignee:%s' % x, bz_users))
-
-bz_qs = BZ_QS % {'product': bz_product,
-                 'assignees': bz_assignees,
-                 'milestone': bz_milestone}
-r = requests.get(BZ_SEARCH_URL % {'fields': BZ_FIELDS, 'qs': bz_qs},
-                 headers={'Accept': 'application/json'})
-#return jsonify(json.loads(r.content))
-bz_content = json.loads(r.content)
+#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'cvan@mozilla.com')
+#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'amckay@mozilla.com')
+#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'kumar.mcmillan@gmail.com')
 
 
-# GitHub's search uses pipes for OR queries.
-bugs = '|'.join(str(bug['id']) for bug in bz_content['bugs'])
+# print
+# print
 
-r = requests.get(GH_SEARCH_URL % {'user': gh_user, 'repo': gh_repo,
-                                  'bugs': bugs},
-                 headers={'Accept': 'application/json'})
-content = pq(r.content)('.commit-group')
 
-# Because this is easy.
-content = (content.html().replace('href="/', 'href="%s/' % GH_URL)
-                         .replace("href='/", "href='%s/" % GH_URL))
-'''
+
+def get_milestone_bugs(product, milestone, users):
+    assignees = '|'.join(map(lambda x: 'assignee:%s' % x, users))
+
+    bz_qs = settings.BZ_QS % {'product': product,
+                              'assignees': assignees,
+                              'milestone': milestone}
+    url = settings.BZ_SEARCH_URL % {'fields': settings.BZ_FIELDS, 'qs': bz_qs}
+    print '-------', bz_qs, '-------'
+    r = requests.get(url, headers={'Accept': 'application/json'})
+    return json.loads(r.content)
+
+
+def set_milestone_bugs(prouct, milestone, user, bugs):
+    for bug in bugs['bugs']:
+        print redis.sadd('products:%s:milestones:%s:users:%s:bugs' % (product, milestone, user), json.dumps(bug))
+
+
+def get_all(build=False):
+    d = {}
+    for product in products:
+        milestones = list(redis.smembers('products:%s:milestones' % product))
+        d[product] = {}
+        print
+        print product
+        print '-' * 5
+        for milestone in milestones:
+            users = list(redis.smembers('products:%s:milestones:%s:users' % (product, milestone)))
+            d[product][milestone] = {}
+            print
+            print '\t', milestone
+            print '\t', '-' * 5
+            for user in users:
+                print '\t', '\t', user
+                if build:
+                    bugs = get_milestone_bugs(product, milestone, [user])
+                    set_milestone_bugs(product, milestone, user, bugs)
+                bugs = list(redis.smembers('products:%s:milestones:%s:users:%s:bugs' % (product, milestone, user)))
+                d[product][milestone][user] = bugs
+    return d
+
+
+print get_all()

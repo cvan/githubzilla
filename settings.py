@@ -18,8 +18,8 @@ BZ_FIELDS = ('id,assigned_to,priority,summary,status,last_change_time,'
 BZ_SEARCH_URL = ('https://api-dev.bugzilla.mozilla.org/latest/bug?'
                  'include_fields=%(fields)s&quicksearch=%(qs)s')
 # Example:
-# :marketplace assignee:cvan|assignee:mattbasta target_milestone:2012-09-27
-BZ_QS = ':%(product)s %(assignees)s target_milestone:%(milestone)s'
+# ALL :marketplace assignee:cvan|assignee:mattbasta target_milestone:2012-09-27
+BZ_QS = 'ALL :%(product)s %(assignees)s target_milestone:%(milestone)s'
 
 BZ_DEFAULT_PRODUCT = 'marketplace'
 BZ_DEFAULT_MILESTONE = '2012-10-11'
