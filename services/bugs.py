@@ -10,30 +10,30 @@ from services import *
 
 
 # Set products.
-#print redis.delete('products')
+print redis.delete('products')
 
-# print redis.sadd('products', 'marketplace')
-# print redis.sadd('products', 'addons')
+print redis.sadd('products', 'marketplace')
+print redis.sadd('products', 'addons')
 products = list(redis.smembers('products'))
-# print products
+print products
 
 
 # # Set milestones.
-# print redis.delete('products:marketplace')
-# print redis.delete('products:addons')
-# for product in products:
-#     print redis.delete('products:%s:milestones' % product)
-#     print redis.sadd('products:%s:milestones' % product, '2012-10-04')
-#     print redis.sadd('products:%s:milestones' % product, '2012-10-11')
+print redis.delete('products:marketplace')
+print redis.delete('products:addons')
+for product in products:
+    print redis.delete('products:%s:milestones' % product)
+    print redis.sadd('products:%s:milestones' % product, '2012-10-04')
+    print redis.sadd('products:%s:milestones' % product, '2012-10-11')
 
-#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'cvan@mozilla.com')
-#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'amckay@mozilla.com')
-#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'kumar.mcmillan@gmail.com')
-#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'mattbasta@gmail.com')
+    print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'cvan@mozilla.com')
+    print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'amckay@mozilla.com')
+    print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'kumar.mcmillan@gmail.com')
+    print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-04'), 'mattbasta@gmail.com')
 
-#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'cvan@mozilla.com')
-#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'amckay@mozilla.com')
-#     print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'kumar.mcmillan@gmail.com')
+    print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'cvan@mozilla.com')
+    print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'amckay@mozilla.com')
+    print redis.sadd('products:%s:milestones:%s:users' % (product, '2012-10-11'), 'kumar.mcmillan@gmail.com')
 
 
 # print
@@ -54,11 +54,10 @@ def get_milestone_bugs(product, milestone, users):
 
 
 def set_milestone_bugs(product, milestone, user, bugs):
-    for bug in bugs['bugs']:
-        print redis.sadd('products:%s:milestones:%s:users:%s:bugs' % (product, milestone, user), json.dumps(bug))
+    print redis.set('products:%s:milestones:%s:users:%s:bugs' % (product, milestone, user), json.dumps(bugs['bugs']))
 
 
-def get_all(build=False):
+def get_all(build=False, sort_key='last_change_time', sort_reverse=True):
     d = {}
     products = list(redis.smembers('products'))
     for product in products:
@@ -78,8 +77,11 @@ def get_all(build=False):
                 if build:
                     bugs = get_milestone_bugs(product, milestone, [user])
                     set_milestone_bugs(product, milestone, user, bugs)
-                bugs = list(redis.smembers('products:%s:milestones:%s:users:%s:bugs' % (product, milestone, user)))
-                d[product][milestone][user] = map(json.loads, bugs)
+                bugs = json.loads(redis.get('products:%s:milestones:%s:users:%s:bugs' % (product, milestone, user)))
+                d[product][milestone][user] = sorted(bugs,
+                    key=lambda x: x[sort_key], reverse=sort_reverse)
+                if not build:
+                    print bugs
     return d
 
 
