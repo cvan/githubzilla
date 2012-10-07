@@ -13,7 +13,7 @@ GH_DEFAULT_USER = 'mozilla'
 GH_DEFAULT_REPO = 'zamboni'
 GH_SEARCH_URL = GH_URL + '/%(user)s/%(repo)s/search?q=%(bugs)s&choice=grep'
 
-BZ_FIELDS = ('id,assigned_to,priority,summary,status,last_change_time,'
+BZ_FIELDS = ('id,assigned_to,priority,summary,status,resolution,last_change_time,'
              'target_milestone,whiteboard')
 BZ_SEARCH_URL = ('https://api-dev.bugzilla.mozilla.org/latest/bug?'
                  'include_fields=%(fields)s&quicksearch=%(qs)s')

@@ -53,13 +53,14 @@ def get_milestone_bugs(product, milestone, users):
     return json.loads(r.content)
 
 
-def set_milestone_bugs(prouct, milestone, user, bugs):
+def set_milestone_bugs(product, milestone, user, bugs):
     for bug in bugs['bugs']:
         print redis.sadd('products:%s:milestones:%s:users:%s:bugs' % (product, milestone, user), json.dumps(bug))
 
 
 def get_all(build=False):
     d = {}
+    products = list(redis.smembers('products'))
     for product in products:
         milestones = list(redis.smembers('products:%s:milestones' % product))
         d[product] = {}
@@ -78,8 +79,13 @@ def get_all(build=False):
                     bugs = get_milestone_bugs(product, milestone, [user])
                     set_milestone_bugs(product, milestone, user, bugs)
                 bugs = list(redis.smembers('products:%s:milestones:%s:users:%s:bugs' % (product, milestone, user)))
-                d[product][milestone][user] = bugs
+                d[product][milestone][user] = map(json.loads, bugs)
     return d
 
 
-print get_all()
+if __name__ == '__main__':
+    try:
+        build = sys.argv[1] == 'build'
+    except IndexError:
+        build = False
+    get_all(build=build)

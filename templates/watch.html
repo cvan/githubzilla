@@ -1,6 +1,34 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <h2>Dashboard</h2>
+    <h3>Bugs</h3>
+    {% for product, value in bugs.iteritems() %}
+        <h4>{{ product }}</h4>
+        {% for milestone, value in value.iteritems() %}
+            <h5>{{ milestone }}</h5>
+            <ul>
+            {% for user, value in value.iteritems() %}
+                <li>
+                    {{ user }}
+                    <ul>
+                        {% for bug in value %}
+                            <li>
+                                <dl>
+                                    {% for column, value in bug.iteritems() %}
+                                        <dt>{{ column }}</dt>
+                                        <dd>{{ value }}</dd>
+                                    {% endfor %}
+                                </dl>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+            </ul>
+        {% endfor %}
+    {% endfor %}
+
     <h2>Watch a Project</h2>
     <form action="" class="c" method="post">
         <div class="form-groups">
